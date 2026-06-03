@@ -74,4 +74,4 @@ async function runSync({ full = false } = {}) {
   }
 }
 
-module.exports = { runSync, isConfigured };
+module.exports = { runSync, isConfigured, isSyncing: () => syncing };

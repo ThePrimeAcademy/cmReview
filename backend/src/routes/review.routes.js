@@ -27,6 +27,15 @@ router.post('/sync', async (req, res) => {
 });
 
 // ── Review hierarchy ──────────────────────────────────────────
+// While the very first sync is still running the store looks empty — answer
+// with a retryable 503 instead of misleading 404s / empty lists.
+router.use((req, res, next) => {
+  if (store.getState().attempts.length === 0 && sync.isSyncing()) {
+    return res.status(503).json({ error: 'First sync still running — data will appear shortly' });
+  }
+  next();
+});
+
 router.get('/groups', (req, res) => {
   res.json(stats.groupsSummary(store.getState().attempts));
 });

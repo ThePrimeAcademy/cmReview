@@ -4,8 +4,21 @@ async function handle(res) {
   return body;
 }
 
-export function getJson(path) {
-  return fetch(path).then(handle);
+// Transient conditions worth retrying: the backend restarting (dev watch /
+// redeploy drops the connection) and 503 while the first sync fills the store.
+const RETRYABLE = new Set([502, 503, 504]);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export async function getJson(path, retries = 3) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const res = await fetch(path);
+      if (!RETRYABLE.has(res.status) || attempt >= retries) return await handle(res);
+    } catch (err) {
+      if (attempt >= retries) throw err instanceof Error ? err : new Error('Network error');
+    }
+    await sleep(900 * (attempt + 1));
+  }
 }
 
 export function postJson(path, data = {}) {
