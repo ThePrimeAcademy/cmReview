@@ -6,11 +6,16 @@ const store = require('./services/store.service');
 const sync = require('./services/sync.service');
 const reviewRoutes = require('./routes/review.routes');
 
+const auth = require('./middleware/auth');
+
 const app = express();
+app.set('trust proxy', 1); // Railway/proxies — makes secure-cookie detection work
 app.use(cors());
 app.use(express.json());
 
-app.use('/api', reviewRoutes);
+app.post('/api/login', auth.login);
+app.get('/api/auth', auth.authStatus);
+app.use('/api', auth.requireAuth, reviewRoutes);
 
 // Serve the built frontend when it exists (npm start from the repo root).
 const DIST = path.join(__dirname, '../../frontend/dist');

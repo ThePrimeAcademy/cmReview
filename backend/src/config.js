@@ -21,4 +21,6 @@ module.exports = {
   EXPORT_URL: process.env.EXPORT_URL || '',
   EXPORT_TOKEN: process.env.EXPORT_TOKEN || '',
   DATA_DIR: process.env.DATA_DIR || path.join(__dirname, '../data'),
+  // Optional shared password for hosted deployments — unset = auth disabled.
+  APP_PASSWORD: process.env.APP_PASSWORD || '',
 };

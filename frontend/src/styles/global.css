@@ -95,6 +95,20 @@ a.row:hover { background: var(--paper-raised); transform: translateX(4px); }
 .row .meta { display: flex; gap: 0.9rem; flex-wrap: wrap; color: var(--ink-soft); font-size: var(--text-sm); margin-top: 0.2rem; }
 .row .right { text-align: right; color: var(--ink-soft); font-size: var(--text-sm); white-space: nowrap; }
 
+/* ── Password gate ──────────────────────────────────────────── */
+.gate { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
+.gate-card {
+  display: flex; flex-direction: column; gap: 0.9rem;
+  width: min(100%, 22rem); padding: 2.2rem 2rem;
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: 12px;
+}
+.gate-card p { margin: 0; color: var(--ink-soft); font-size: var(--text-sm); }
+.gate-card input {
+  font: inherit; padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line); border-radius: 8px; background: transparent; color: inherit;
+}
+.gate-card input:focus { outline: 2px solid var(--accent, currentColor); outline-offset: 1px; }
+
 .group-row { grid-template-columns: auto 1fr auto; }
 .test-row { grid-template-columns: auto 1fr auto auto; }
 .question-row { grid-template-columns: auto 7.5rem 1fr auto; }

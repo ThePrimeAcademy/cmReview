@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { getJson, postJson } from './services/api';
+import PasswordGate from './components/PasswordGate';
 import GroupsPage from './pages/GroupsPage';
 import GroupPage from './pages/GroupPage';
 import TestPage from './pages/TestPage';
@@ -16,6 +17,8 @@ function relativeTime(iso) {
 }
 
 export default function App() {
+  // null = checking, false = password needed, true = good to go
+  const [authed, setAuthed] = useState(null);
   const [status, setStatus] = useState(null);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(null);
@@ -26,7 +29,13 @@ export default function App() {
     getJson('/api/status').then(setStatus).catch((e) => setError(e.message));
   }, []);
 
-  useEffect(() => { refreshStatus(); }, [refreshStatus]);
+  useEffect(() => {
+    getJson('/api/auth')
+      .then((a) => setAuthed(a.authenticated))
+      .catch(() => setAuthed(true)); // older backend without /api/auth — proceed
+  }, []);
+
+  useEffect(() => { if (authed) refreshStatus(); }, [authed, refreshStatus]);
 
   const runSync = async () => {
     setSyncing(true);
@@ -41,6 +50,9 @@ export default function App() {
       setSyncing(false);
     }
   };
+
+  if (authed === null) return null;
+  if (authed === false) return <PasswordGate onUnlock={() => setAuthed(true)} />;
 
   return (
     <div className="shell">
