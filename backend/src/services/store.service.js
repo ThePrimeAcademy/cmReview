@@ -46,16 +46,29 @@ function save() {
   fs.writeFileSync(FILES.meta, JSON.stringify(state.meta, null, 2));
 }
 
+// ClassMarker sends display fields HTML-escaped ("Danny&#039;s…"). The UI
+// renders these as plain text, so decode common entities at ingest.
+function decodeEntities(s) {
+  if (s == null) return s;
+  return String(s)
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#0?39;|&apos;/gi, "'")
+    .replace(/&quot;/gi, '"')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&amp;/gi, '&');
+}
+
 function toAttempt(record) {
   return {
     recordKey: record.recordKey,
     userId: record.userId != null ? String(record.userId) : null,
     email: record.email || null,
-    name: record.name || record.email || 'Unknown',
+    name: decodeEntities(record.name) || record.email || 'Unknown',
     testId: record.testId != null ? String(record.testId) : null,
-    testName: record.testName || null,
+    testName: decodeEntities(record.testName) || null,
     groupId: record.groupId != null ? String(record.groupId) : null,
-    groupName: record.groupName || null,
+    groupName: decodeEntities(record.groupName) || null,
     percentage: record.percentage ?? null,
     score: record.score ?? null,
     maxScore: record.maxScore ?? null,
@@ -66,7 +79,7 @@ function toAttempt(record) {
       questionId: q.questionId != null ? String(q.questionId) : null,
       type: q.questionType || q.type || null,
       categoryId: q.categoryId != null ? String(q.categoryId) : null,
-      categoryName: q.categoryName || null,
+      categoryName: decodeEntities(q.categoryName) || null,
       sectionNumber: q.sectionNumber ?? null,
       questionNumber: q.questionNumber ?? null,
       result: q.result || null,
@@ -98,7 +111,7 @@ function applyRecords(records) {
         correctOption: q.correctOption ?? null,
         type: q.questionType || q.type || null,
         categoryId: q.categoryId != null ? String(q.categoryId) : null,
-        categoryName: q.categoryName || null,
+        categoryName: decodeEntities(q.categoryName) || null,
         updatedAt: record.receivedAt || null,
       };
     }

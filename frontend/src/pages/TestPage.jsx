@@ -51,6 +51,9 @@ export default function TestPage() {
                 <span className="name">
                   {q.hasText ? q.snippet : `Question ${q.questionNumber ?? q.questionId}`}
                 </span>
+                {!q.hasText && q.image && (
+                  <img className="q-thumb" src={q.image} alt="Question content" loading="lazy" />
+                )}
                 <span className="meta">
                   {q.categoryName && <Chip>{q.categoryName}</Chip>}
                   {q.questionNumber != null && <span>#{q.questionNumber}</span>}

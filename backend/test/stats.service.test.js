@@ -36,6 +36,29 @@ const q = (questionId, result, userResponse = null) => ({
   categoryName: 'Algebra',
 });
 
+test('question metadata prefers the most recently taken attempt (category renames)', () => {
+  // Arrange — newest attempt first in store order, older (pre-rename) appended
+  // later, mirroring a backfill sync. Old metadata must not win by iteration order.
+  const attempts = [
+    attempt({
+      timeFinished: 2000,
+      questions: [{ ...q('q1', 'correct'), categoryName: 'Word In Context' }],
+    }),
+    attempt({
+      timeFinished: 1000,
+      questions: [{ ...q('q1', 'incorrect'), categoryName: 'WIC M' }],
+    }),
+  ];
+
+  // Act
+  const rows = questionsForTest(attempts, {}, 'g1', 't1');
+  const detail = questionDetail(attempts, {}, 'g1', 't1', 'q1');
+
+  // Assert
+  assert.equal(rows[0].categoryName, 'Word In Context');
+  assert.equal(detail.stats.categoryName, 'Word In Context');
+});
+
 test('groupsSummary aggregates attempts, tests and students per group', () => {
   // Arrange
   const attempts = [

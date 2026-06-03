@@ -98,6 +98,11 @@ a.row:hover { background: var(--paper-raised); transform: translateX(4px); }
 .group-row { grid-template-columns: auto 1fr auto; }
 .test-row { grid-template-columns: auto 1fr auto auto; }
 .question-row { grid-template-columns: auto 7.5rem 1fr auto; }
+.question-row .q-thumb {
+  display: block; max-height: 110px; max-width: min(100%, 22rem);
+  margin-top: 0.45rem; border-radius: 6px;
+  background: #fff; border: 1px solid var(--line);
+}
 
 /* ── Miss meter ─────────────────────────────────────────────── */
 .miss { display: flex; flex-direction: column; gap: 0.3rem; }

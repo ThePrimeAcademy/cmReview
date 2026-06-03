@@ -30,6 +30,13 @@ function snippet(html, maxLength = 160) {
   return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
 }
 
+// Many SAT questions are image-only — surface the first image so list views
+// can still show the question itself when there's no text to snippet.
+function firstImageSrc(html) {
+  const match = String(html || '').match(/<img[^>]+src=["']([^"']+)["']/i);
+  return match ? match[1] : null;
+}
+
 const naturalCompare = (a, b) =>
   String(a || '').localeCompare(String(b || ''), undefined, { numeric: true, sensitivity: 'base' });
 
@@ -139,10 +146,17 @@ function aggregateQuestions(attempts, groupId, testId) {
       } else {
         s.ungraded++;
       }
-      s.categoryName = q.categoryName || s.categoryName;
-      s.questionNumber = q.questionNumber ?? s.questionNumber;
-      s.sectionNumber = q.sectionNumber ?? s.sectionNumber;
-      s.type = q.type || s.type;
+      // Metadata can change on ClassMarker after earlier students tested
+      // (e.g. category renames) — take it from the most recently taken
+      // attempt, not whichever record happens to be iterated last.
+      const takenAt = a.timeFinished || 0;
+      if (takenAt >= (s.metaTakenAt || 0)) {
+        s.metaTakenAt = takenAt;
+        if (q.categoryName) s.categoryName = q.categoryName;
+        if (q.questionNumber != null) s.questionNumber = q.questionNumber;
+        if (q.sectionNumber != null) s.sectionNumber = q.sectionNumber;
+        if (q.type) s.type = q.type;
+      }
     }
   }
   return byId;
@@ -152,13 +166,15 @@ function questionsForTest(attempts, bank, groupId, testId) {
   const byId = aggregateQuestions(attempts, groupId, testId);
 
   return Object.values(byId)
-    .map((s) => {
+    .map(({ metaTakenAt, ...s }) => {
       const entry = bank[s.questionId];
+      const text = entry ? snippet(entry.question) : '';
       return {
         ...s,
         missRate: s.asked > 0 ? Math.round((s.missed / s.asked) * 1000) / 10 : 0,
-        snippet: entry ? snippet(entry.question) : null,
-        hasText: Boolean(entry && entry.question),
+        snippet: text || null,
+        image: entry ? firstImageSrc(entry.question) : null,
+        hasText: Boolean(text), // image-only questions strip to '' — fall back to number + thumb
       };
     })
     .sort((x, y) => y.missRate - x.missRate || y.missed - x.missed || y.asked - x.asked)
@@ -167,7 +183,7 @@ function questionsForTest(attempts, bank, groupId, testId) {
 
 // ── Single question detail ────────────────────────────────────
 function questionDetail(attempts, bank, groupId, testId, questionId) {
-  const stats = aggregateQuestions(attempts, groupId, testId)[String(questionId)] || null;
+  const agg = aggregateQuestions(attempts, groupId, testId)[String(questionId)] || null;
   const entry = bank[String(questionId)] || null;
 
   const rows = [];
@@ -191,12 +207,16 @@ function questionDetail(attempts, bank, groupId, testId, questionId) {
 
   rows.sort((x, y) => (y.timeFinished || 0) - (x.timeFinished || 0));
 
+  let statsOut = null;
+  if (agg) {
+    const { metaTakenAt, ...rest } = agg;
+    statsOut = { ...rest, missRate: agg.asked > 0 ? Math.round((agg.missed / agg.asked) * 1000) / 10 : 0 };
+  }
+
   return {
     questionId: String(questionId),
     bank: entry,
-    stats: stats
-      ? { ...stats, missRate: stats.asked > 0 ? Math.round((stats.missed / stats.asked) * 1000) / 10 : 0 }
-      : null,
+    stats: statsOut,
     distribution: Object.entries(distribution)
       .map(([response, count]) => ({ response, count }))
       .sort((x, y) => y.count - x.count),
