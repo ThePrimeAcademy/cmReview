@@ -1,0 +1,176 @@
+/* ── Design tokens — Swiss-analytical, warm paper + ink ─────── */
+:root {
+  --paper: oklch(97.5% 0.006 85);
+  --paper-raised: oklch(99% 0.004 85);
+  --ink: oklch(24% 0.02 270);
+  --ink-soft: oklch(45% 0.015 270);
+  --ink-faint: oklch(62% 0.012 270);
+  --line: oklch(88% 0.01 85);
+  --accent: oklch(55% 0.19 25);
+  --good: oklch(56% 0.14 150);
+  --warn: oklch(70% 0.15 80);
+  --bad: oklch(58% 0.21 25);
+  --chip-bg: oklch(93% 0.01 85);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem);
+  --text-huge: clamp(2.4rem, 1.6rem + 3vw, 4rem);
+
+  --space-page: clamp(1.25rem, 4vw, 3.5rem);
+  --duration-fast: 150ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { margin: 0; min-height: 100vh; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ── Layout ─────────────────────────────────────────────────── */
+.shell { max-width: 1080px; margin: 0 auto; padding: 0 var(--space-page) 6rem; }
+
+.topbar {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+  padding: 1.4rem 0 1rem;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 0.75rem;
+}
+.wordmark { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); letter-spacing: -0.01em; }
+.wordmark em { font-style: italic; color: var(--accent); }
+
+.syncline { display: flex; align-items: center; gap: 0.75rem; font-size: var(--text-sm); color: var(--ink-soft); }
+.syncline button {
+  font: 600 var(--text-sm) var(--font-body);
+  background: var(--ink); color: var(--paper);
+  border: none; border-radius: 999px; padding: 0.35rem 1rem;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out), opacity var(--duration-fast);
+}
+.syncline button:hover { transform: translateY(-1px); }
+.syncline button:active { transform: translateY(0); }
+.syncline button:disabled { opacity: 0.5; cursor: wait; }
+.syncline .error { color: var(--bad); max-width: 36ch; }
+
+.crumbs { display: flex; gap: 0.5rem; flex-wrap: wrap; font-size: var(--text-sm); color: var(--ink-faint); padding: 0.6rem 0 1.8rem; }
+.crumbs a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.crumbs .sep { user-select: none; }
+.crumbs .here { color: var(--ink-soft); font-weight: 500; }
+
+.page-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.02em; margin: 0 0 0.25rem; line-height: 1.15; }
+.page-sub { color: var(--ink-soft); font-size: var(--text-sm); margin: 0 0 2rem; }
+
+/* ── Row lists (groups / tests / questions) ─────────────────── */
+.rows { display: flex; flex-direction: column; }
+.row {
+  display: grid; align-items: center; gap: 1.25rem;
+  padding: 1.1rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  transition: background var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+}
+a.row:hover { background: var(--paper-raised); transform: translateX(4px); }
+.row .idx {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--text-lg); color: var(--ink-faint);
+  min-width: 2.2ch; text-align: right;
+}
+.row .main { min-width: 0; }
+.row .name { font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; }
+.row .meta { display: flex; gap: 0.9rem; flex-wrap: wrap; color: var(--ink-soft); font-size: var(--text-sm); margin-top: 0.2rem; }
+.row .right { text-align: right; color: var(--ink-soft); font-size: var(--text-sm); white-space: nowrap; }
+
+.group-row { grid-template-columns: auto 1fr auto; }
+.test-row { grid-template-columns: auto 1fr auto auto; }
+.question-row { grid-template-columns: auto 7.5rem 1fr auto; }
+
+/* ── Miss meter ─────────────────────────────────────────────── */
+.miss { display: flex; flex-direction: column; gap: 0.3rem; }
+.miss .pct { font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; line-height: 1; }
+.miss .track { height: 5px; border-radius: 3px; background: var(--chip-bg); overflow: hidden; }
+.miss .fill { height: 100%; border-radius: 3px; }
+.miss .counts { font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.02em; }
+
+.chip {
+  display: inline-block; background: var(--chip-bg); color: var(--ink-soft);
+  border-radius: 999px; padding: 0.1rem 0.65rem;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase;
+}
+.chip.result-correct { background: color-mix(in oklch, var(--good) 16%, white); color: var(--good); }
+.chip.result-partial_correct { background: color-mix(in oklch, var(--warn) 20%, white); color: oklch(50% 0.13 80); }
+.chip.result-incorrect { background: color-mix(in oklch, var(--bad) 14%, white); color: var(--bad); }
+.chip.result-unanswered { background: var(--chip-bg); color: var(--ink-faint); }
+.chip.result-requires_grading, .chip.result-answered { background: oklch(92% 0.04 300); color: oklch(45% 0.12 300); }
+
+/* ── Question detail ────────────────────────────────────────── */
+.detail { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 2.5rem; align-items: start; }
+@media (max-width: 880px) { .detail { grid-template-columns: 1fr; } }
+
+.q-content {
+  background: var(--paper-raised); border: 1px solid var(--line);
+  border-radius: 10px; padding: 1.6rem 1.8rem;
+  font-size: 1.02rem; overflow-wrap: anywhere;
+}
+.q-content img { max-width: 100%; height: auto; }
+.q-missing { color: var(--ink-faint); font-style: italic; }
+
+.options { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.4rem; }
+.option {
+  display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center;
+  border: 1px solid var(--line); border-radius: 8px; padding: 0.65rem 0.9rem;
+  position: relative; overflow: hidden;
+}
+.option .bar { position: absolute; inset: 0; background: var(--chip-bg); opacity: 0.55; z-index: 0; }
+.option > * { position: relative; z-index: 1; }
+.option.is-correct { border-color: var(--good); }
+.option.is-correct .bar { background: color-mix(in oklch, var(--good) 18%, white); }
+.option .opt-text { overflow-wrap: anywhere; }
+.option .picks { font-size: var(--text-sm); color: var(--ink-soft); white-space: nowrap; font-weight: 600; }
+.option .tick { color: var(--good); font-weight: 700; margin-right: 0.4rem; }
+
+.statcard {
+  border: 2px solid var(--ink); border-radius: 12px;
+  padding: 1.4rem 1.5rem; background: var(--paper-raised);
+  position: sticky; top: 1rem;
+}
+.statcard .big { font-family: var(--font-display); font-size: var(--text-huge); font-weight: 700; line-height: 1; }
+.statcard .big-label { color: var(--ink-soft); font-size: var(--text-sm); margin-bottom: 1.1rem; }
+.statcard dl { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 1rem; margin: 0; font-size: var(--text-sm); }
+.statcard dt { color: var(--ink-soft); }
+.statcard dd { margin: 0; text-align: right; font-weight: 600; }
+
+.attempts-table { width: 100%; border-collapse: collapse; margin-top: 2.5rem; font-size: var(--text-sm); }
+.attempts-table caption { text-align: left; font-family: var(--font-display); font-weight: 600; font-size: var(--text-lg); padding-bottom: 0.8rem; }
+.attempts-table th { text-align: left; color: var(--ink-faint); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.7rem; padding: 0.4rem 0.75rem; border-bottom: 2px solid var(--ink); }
+.attempts-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.attempts-table td.resp { max-width: 28ch; overflow-wrap: anywhere; color: var(--ink-soft); }
+
+/* ── States ─────────────────────────────────────────────────── */
+.empty {
+  border: 1.5px dashed var(--line); border-radius: 12px;
+  padding: 3rem 2rem; text-align: center; color: var(--ink-soft);
+  margin-top: 2rem;
+}
+.empty strong { display: block; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); margin-bottom: 0.4rem; }
+.empty code { background: var(--chip-bg); border-radius: 4px; padding: 0.1rem 0.4rem; font-size: 0.85em; }
+
+.loading { color: var(--ink-faint); padding: 3rem 0; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; }
+}
