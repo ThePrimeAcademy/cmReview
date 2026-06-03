@@ -55,8 +55,8 @@ export default function TestPage() {
                   <img className="q-thumb" src={q.image} alt="Question content" loading="lazy" />
                 )}
                 <span className="meta">
+                  {q.questionNumber != null && <span className="q-num">Q{q.questionNumber} on test</span>}
                   {q.categoryName && <Chip>{q.categoryName}</Chip>}
-                  {q.questionNumber != null && <span>#{q.questionNumber}</span>}
                   {q.ungraded > 0 && <span>{q.ungraded} ungraded</span>}
                 </span>
               </span>

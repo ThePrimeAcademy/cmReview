@@ -127,7 +127,7 @@ function aggregateQuestions(attempts, groupId, testId) {
   const byId = {};
   for (const a of attempts) {
     if (a.groupId !== String(groupId) || a.testId !== String(testId)) continue;
-    for (const q of a.questions || []) {
+    for (const [position, q] of (a.questions || []).entries()) {
       if (!q.questionId) continue;
       if (!byId[q.questionId]) {
         byId[q.questionId] = {
@@ -153,7 +153,9 @@ function aggregateQuestions(attempts, groupId, testId) {
       if (takenAt >= (s.metaTakenAt || 0)) {
         s.metaTakenAt = takenAt;
         if (q.categoryName) s.categoryName = q.categoryName;
-        if (q.questionNumber != null) s.questionNumber = q.questionNumber;
+        // ClassMarker webhooks often omit question_number — fall back to the
+        // question's position on the test (array order of the latest attempt).
+        s.questionNumber = q.questionNumber ?? position + 1;
         if (q.sectionNumber != null) s.sectionNumber = q.sectionNumber;
         if (q.type) s.type = q.type;
       }

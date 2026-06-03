@@ -36,6 +36,22 @@ const q = (questionId, result, userResponse = null) => ({
   categoryName: 'Algebra',
 });
 
+test('question number falls back to test position when payloads omit it', () => {
+  // Arrange — ClassMarker webhooks often send question_number=null; the
+  // array order of the latest attempt is the test order.
+  const attempts = [
+    attempt({ timeFinished: 2000, questions: [q('q1', 'correct'), q('q2', 'incorrect'), q('q3', 'correct')] }),
+  ];
+
+  // Act
+  const rows = questionsForTest(attempts, {}, 'g1', 't1');
+
+  // Assert — ranked most-missed first (q2), but numbered by test position
+  assert.equal(rows[0].questionId, 'q2');
+  const numbers = Object.fromEntries(rows.map((r) => [r.questionId, r.questionNumber]));
+  assert.deepEqual(numbers, { q1: 1, q2: 2, q3: 3 });
+});
+
 test('question metadata prefers the most recently taken attempt (category renames)', () => {
   // Arrange — newest attempt first in store order, older (pre-rename) appended
   // later, mirroring a backfill sync. Old metadata must not win by iteration order.

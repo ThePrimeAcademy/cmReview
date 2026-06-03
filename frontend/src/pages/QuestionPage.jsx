@@ -18,6 +18,19 @@ function normalizeOptions(options) {
 
 const textOf = (html) => String(html ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
 
+// Freetext-style questions store grading rules instead of choices:
+//   { exact_match: [{ content: '320' }, { content: '0.96' }] }
+// Returns the accepted answers, or null when this is a normal choice question.
+function acceptedAnswers(options) {
+  if (!options || typeof options !== 'object' || Array.isArray(options) || !options.exact_match) return null;
+  const rules = Array.isArray(options.exact_match) ? options.exact_match : [options.exact_match];
+  const answers = rules
+    .map((r) => (r && typeof r === 'object' ? r.content : r))
+    .map((v) => (v == null ? '' : String(v).trim()))
+    .filter(Boolean);
+  return answers.length > 0 ? answers : null;
+}
+
 export default function QuestionPage() {
   const { groupId, testId, questionId } = useParams();
   const [data, setData] = useState(null);
@@ -33,8 +46,10 @@ export default function QuestionPage() {
   if (!data) return <Loading />;
 
   const { groupName, test, bank, stats, distribution, attempts } = data;
-  const options = normalizeOptions(bank?.options);
+  const accepted = acceptedAnswers(bank?.options);
+  const options = accepted ? [] : normalizeOptions(bank?.options);
   const correctText = textOf(bank?.correctOption);
+  const isAccepted = (response) => Boolean(accepted?.some((a) => textOf(a) === textOf(response)));
 
   const pickCount = (opt) => {
     const optText = textOf(opt.html);
@@ -96,7 +111,28 @@ export default function QuestionPage() {
               </div>
             )}
 
-            {otherResponses.length > 0 && (
+            {accepted && (
+              <div className="options">
+                <div className="option is-correct">
+                  <span className="opt-text">
+                    <span className="tick">✓</span>
+                    <strong>Accepted answer{accepted.length === 1 ? '' : 's'}:</strong> {accepted.join('  ·  ')}
+                  </span>
+                </div>
+                {distribution.map((d) => (
+                  <div className={`option${isAccepted(d.response) ? ' is-correct' : ''}`} key={d.response}>
+                    <div className="bar" style={{ width: `${(d.count / totalPicks) * 100}%` }} />
+                    <span className="opt-text">
+                      {isAccepted(d.response) && <span className="tick">✓</span>}
+                      {d.response}
+                    </span>
+                    <span className="picks">{d.count} pick{d.count === 1 ? '' : 's'}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!accepted && otherResponses.length > 0 && (
               <div className="options">
                 {otherResponses.map((d) => (
                   <div className="option" key={d.response}>
