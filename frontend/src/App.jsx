@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { getJson, postJson } from './services/api';
 import PasswordGate from './components/PasswordGate';
+import AnnotationLayer from './components/annotation/AnnotationLayer';
 import GroupsPage from './pages/GroupsPage';
 import GroupPage from './pages/GroupPage';
 import TestPage from './pages/TestPage';
@@ -74,6 +75,8 @@ export default function App() {
           <Route path="/groups/:groupId/tests/:testId/questions/:questionId" element={<QuestionPage key={dataVersion} />} />
         </Routes>
       </main>
+
+      <AnnotationLayer />
     </div>
   );
 }
