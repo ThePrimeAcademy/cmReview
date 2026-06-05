@@ -29,7 +29,7 @@
 .present-q {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(2rem, 1rem + 4.5vw, 4.8rem);
+  font-size: clamp(1.4rem, 0.8rem + 2.4vw, 3rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
 }
