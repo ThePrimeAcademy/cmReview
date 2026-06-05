@@ -78,6 +78,20 @@ a { color: inherit; text-decoration: none; }
 .page-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.02em; margin: 0 0 0.25rem; line-height: 1.15; }
 .page-sub { color: var(--ink-soft); font-size: var(--text-sm); margin: 0 0 2rem; }
 
+/* ── List head: sub-line + sort control ─────────────────────── */
+.listhead { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.listhead .page-sub { margin-bottom: 0; }
+.sortbar { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 999px; overflow: hidden; }
+.sortbar button {
+  font: 600 0.72rem var(--font-body); letter-spacing: 0.04em; text-transform: uppercase;
+  background: transparent; color: var(--ink-soft);
+  border: none; padding: 0.3rem 0.85rem; cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast);
+}
+.sortbar button:hover { color: var(--ink); background: var(--chip-bg); }
+.sortbar button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sortbar button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
+
 /* ── Row lists (groups / tests / questions) ─────────────────── */
 .rows { display: flex; flex-direction: column; }
 .row {
