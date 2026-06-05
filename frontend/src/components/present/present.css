@@ -102,6 +102,7 @@
 
 .present-fs--float {
   position: fixed;
+  z-index: 80; /* above the annotation overlay + toolbar */
   top: 1rem;
   right: 1rem;
   width: 2.6rem;

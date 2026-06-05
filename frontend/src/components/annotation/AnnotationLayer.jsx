@@ -9,8 +9,11 @@ import './annotation.css';
 // while it scrolls underneath the fixed overlay.
 const docPoint = (e) => ({ x: e.clientX + window.scrollX, y: e.clientY + window.scrollY });
 
-export default function AnnotationLayer() {
+export default function AnnotationLayer({ surfaceId }) {
   const { pathname } = useLocation();
+  // Strokes are stored per surface: the route path in the app, or the projected
+  // question id on the presenter view — so advancing the question clears the canvas.
+  const surface = surfaceId ?? pathname;
 
   const [active, setActive] = useState(false);
   const [tool, setTool] = useState('pen');
@@ -28,13 +31,13 @@ export default function AnnotationLayer() {
   const [scroll, setScroll] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    setStrokes(storeRef.current.get(pathname) || []);
-  }, [pathname]);
+    setStrokes(storeRef.current.get(surface) || []);
+  }, [surface]);
 
   const commit = useCallback((next) => {
-    storeRef.current.set(pathname, next);
+    storeRef.current.set(surface, next);
     setStrokes(next);
-  }, [pathname]);
+  }, [surface]);
 
   useEffect(() => {
     let frame = 0;

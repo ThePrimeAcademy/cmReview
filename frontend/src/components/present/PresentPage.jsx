@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import QuestionHtml from '../QuestionHtml';
+import AnnotationLayer from '../annotation/AnnotationLayer';
 import { acceptedAnswers, normalizeOptions } from '../../lib/questions';
 import { PRESENT_CHANNEL, MSG, channelSupported } from './channel';
 import './present.css';
@@ -69,6 +70,10 @@ export default function PresentPage() {
           ))}
         </ol>
       )}
+
+      {/* Write on the projected question — scoped to this question, so
+          advancing the slide clears the canvas. */}
+      <AnnotationLayer surfaceId={`present:${q.id ?? q.number}`} />
     </main>
   );
 }

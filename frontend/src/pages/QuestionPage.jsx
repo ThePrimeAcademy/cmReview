@@ -22,6 +22,7 @@ export default function QuestionPage() {
     () =>
       data
         ? {
+            id: questionId,
             number: data.stats?.questionNumber ?? questionId,
             question: data.bank?.question ?? null,
             options: data.bank?.options ?? null,
