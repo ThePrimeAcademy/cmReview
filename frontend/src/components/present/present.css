@@ -1,0 +1,114 @@
+/* ── Projector / presenter view — question only, room-legible scale ── */
+
+.present,
+.present-wait {
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.present {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vh, 5rem) clamp(1.5rem, 6vw, 5rem);
+  position: relative;
+}
+
+.present-num {
+  margin: 0;
+  font: 600 clamp(0.9rem, 0.7rem + 0.8vw, 1.3rem) / 1 var(--font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.present-q {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2rem, 1rem + 4.5vw, 4.8rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+.present-q img { max-width: 100%; height: auto; }
+.present-missing { color: var(--ink-faint); font-style: italic; }
+
+.present-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.6rem, 1.4vh, 1.1rem);
+}
+
+.present-opt {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(0.8rem, 1.5vw, 1.4rem);
+  padding: clamp(0.7rem, 1.4vh, 1.15rem) clamp(1rem, 2vw, 1.6rem);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper-raised);
+  font-size: clamp(1.25rem, 0.8rem + 1.6vw, 2.3rem);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.present-key {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.62em;
+  align-self: center;
+}
+
+/* Waiting / idle screen */
+.present-wait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  text-align: center;
+  padding: 2rem;
+}
+.present-brand { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); }
+.present-brand em { font-style: italic; color: var(--accent); }
+.present-wait p { margin: 0; color: var(--ink-soft); max-width: 38ch; font-size: var(--text-lg); }
+.present-hint { font-size: var(--text-sm) !important; color: var(--ink-faint) !important; }
+
+.present-fs {
+  font: 600 var(--text-base) var(--font-body);
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1.3rem;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.present-fs:hover { transform: translateY(-1px); }
+
+.present-fs--float {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0;
+  font-size: 1.1rem;
+  opacity: 0.25;
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+}
+.present-fs--float:hover { opacity: 1; transform: translateY(-1px); }

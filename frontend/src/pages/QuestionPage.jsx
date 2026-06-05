@@ -1,35 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getJson, missColor } from '../services/api';
 import { Chip, Crumbs, Empty, Loading } from '../components/ui';
 import QuestionHtml from '../components/QuestionHtml';
-
-// ClassMarker option payloads vary in shape — normalize to [{ key, html }].
-function normalizeOptions(options) {
-  if (options == null) return [];
-  if (Array.isArray(options)) {
-    return options.map((o, i) => ({ key: String.fromCharCode(65 + i), html: typeof o === 'object' ? (o.option ?? o.text ?? JSON.stringify(o)) : String(o) }));
-  }
-  if (typeof options === 'object') {
-    return Object.entries(options).map(([key, value]) => ({ key, html: typeof value === 'object' ? JSON.stringify(value) : String(value) }));
-  }
-  return [{ key: 'A', html: String(options) }];
-}
-
-const textOf = (html) => String(html ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
-
-// Freetext-style questions store grading rules instead of choices:
-//   { exact_match: [{ content: '320' }, { content: '0.96' }] }
-// Returns the accepted answers, or null when this is a normal choice question.
-function acceptedAnswers(options) {
-  if (!options || typeof options !== 'object' || Array.isArray(options) || !options.exact_match) return null;
-  const rules = Array.isArray(options.exact_match) ? options.exact_match : [options.exact_match];
-  const answers = rules
-    .map((r) => (r && typeof r === 'object' ? r.content : r))
-    .map((v) => (v == null ? '' : String(v).trim()))
-    .filter(Boolean);
-  return answers.length > 0 ? answers : null;
-}
+import { acceptedAnswers, normalizeOptions, textOf } from '../lib/questions';
+import { usePresenter } from '../hooks/usePresenter';
 
 export default function QuestionPage() {
   const { groupId, testId, questionId } = useParams();
@@ -41,6 +16,20 @@ export default function QuestionPage() {
       .then(setData)
       .catch((e) => setError(e.message));
   }, [groupId, testId, questionId]);
+
+  // Mirror just the question + options (never answers/stats) to the projector.
+  const presentPayload = useMemo(
+    () =>
+      data
+        ? {
+            number: data.stats?.questionNumber ?? questionId,
+            question: data.bank?.question ?? null,
+            options: data.bank?.options ?? null,
+          }
+        : null,
+    [data, questionId],
+  );
+  usePresenter(presentPayload);
 
   if (error) return <Empty title="Could not load question">{error}</Empty>;
   if (!data) return <Loading />;

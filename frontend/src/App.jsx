@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { getJson, postJson } from './services/api';
 import PasswordGate from './components/PasswordGate';
 import AnnotationLayer from './components/annotation/AnnotationLayer';
+import PresentPage from './components/present/PresentPage';
 import GroupsPage from './pages/GroupsPage';
 import GroupPage from './pages/GroupPage';
 import TestPage from './pages/TestPage';
@@ -17,6 +18,24 @@ function relativeTime(iso) {
   return `${Math.round(mins / (60 * 24))}d ago`;
 }
 
+// Open the question-only projector view, best-effort placed on a second screen
+// (extended displays). Falls back to a normal popup the teacher drags over.
+async function openPresentWindow() {
+  let features = 'width=1280,height=800';
+  try {
+    if (window.getScreenDetails) {
+      const details = await window.getScreenDetails();
+      const external = details.screens.find((s) => !s.isPrimary);
+      if (external) {
+        features = `popup,left=${external.availLeft},top=${external.availTop},width=${external.availWidth},height=${external.availHeight}`;
+      }
+    }
+  } catch {
+    // Permission denied or unsupported — the plain popup below still works.
+  }
+  window.open('/present', 'cmreview-present', features);
+}
+
 export default function App() {
   // null = checking, false = password needed, true = good to go
   const [authed, setAuthed] = useState(null);
@@ -25,6 +44,7 @@ export default function App() {
   const [error, setError] = useState(null);
   // Bump to force route content to re-fetch after a sync completes.
   const [dataVersion, setDataVersion] = useState(0);
+  const location = useLocation();
 
   const refreshStatus = useCallback(() => {
     getJson('/api/status').then(setStatus).catch((e) => setError(e.message));
@@ -55,6 +75,9 @@ export default function App() {
   if (authed === null) return null;
   if (authed === false) return <PasswordGate onUnlock={() => setAuthed(true)} />;
 
+  // Projector window: bare question-only view, no topbar/sync/annotation chrome.
+  if (location.pathname === '/present') return <PresentPage />;
+
   return (
     <div className="shell">
       <header className="topbar">
@@ -63,6 +86,7 @@ export default function App() {
           {error
             ? <span className="error" title={error}>⚠ {error}</span>
             : status && <span>{status.attempts} attempts · synced {relativeTime(status.lastSyncAt)}</span>}
+          <button type="button" className="ghost" onClick={openPresentWindow} title="Open a question-only window for the projector">Present</button>
           <button onClick={runSync} disabled={syncing}>{syncing ? 'Syncing…' : 'Sync'}</button>
         </div>
       </header>
