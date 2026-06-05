@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import QuestionHtml from '../QuestionHtml';
 import AnnotationLayer from '../annotation/AnnotationLayer';
-import { acceptedAnswers, normalizeOptions } from '../../lib/questions';
+import { acceptedAnswers, normalizeOptions, isMathQuestion } from '../../lib/questions';
 import { PRESENT_CHANNEL, MSG, channelSupported } from './channel';
 import './present.css';
 
@@ -11,6 +11,9 @@ import './present.css';
 // BroadcastChannel, so it has no API access of its own.
 export default function PresentPage() {
   const [q, setQ] = useState(null);
+  // Blank area to work the problem with the pen. Defaults open on math
+  // questions, but the teacher can override per question via the ✎ toggle.
+  const [workOpen, setWorkOpen] = useState(false);
 
   useEffect(() => {
     if (!channelSupported) return undefined;
@@ -21,6 +24,11 @@ export default function PresentPage() {
     channel.postMessage({ kind: MSG.HELLO }); // ask the teacher for the current question
     return () => channel.close();
   }, []);
+
+  // Reset the work area to its auto-detected default whenever the slide changes.
+  useEffect(() => {
+    setWorkOpen(isMathQuestion(q));
+  }, [q?.id, q?.number]);
 
   const toggleFullscreen = () => {
     if (document.fullscreenElement) document.exitFullscreen?.();
@@ -50,7 +58,15 @@ export default function PresentPage() {
   const options = accepted ? [] : normalizeOptions(q.options);
 
   return (
-    <main className="present">
+    <main className={`present${workOpen ? ' has-work' : ''}`}>
+      <button
+        type="button"
+        className={`present-fs present-fs--float present-fs--work${workOpen ? ' is-on' : ''}`}
+        onClick={() => setWorkOpen((open) => !open)}
+        aria-pressed={workOpen}
+        aria-label="Toggle work space"
+        title="Work space"
+      >✎</button>
       <button type="button" className="present-fs present-fs--float" onClick={toggleFullscreen} aria-label="Toggle fullscreen" title="Fullscreen">⛶</button>
 
       <p className="present-num">Question {q.number}</p>
@@ -70,6 +86,11 @@ export default function PresentPage() {
           ))}
         </ol>
       )}
+
+      {/* Blank room to work the problem live with the pen. Grows to fill the
+          projector below the question; the annotation canvas spans the whole
+          viewport, so writing here needs no extra wiring. */}
+      {workOpen && <div className="present-work" aria-hidden="true" />}
 
       {/* Write on the projected question — scoped to this question, so
           advancing the slide clears the canvas. */}

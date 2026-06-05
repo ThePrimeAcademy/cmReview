@@ -36,6 +36,31 @@
 .present-q img { max-width: 100%; height: auto; }
 .present-missing { color: var(--ink-faint); font-style: italic; }
 
+/* When the work area is open, anchor the question to the top so the blank
+   space falls below it instead of being absorbed by vertical centering. */
+.present.has-work { justify-content: flex-start; }
+
+/* Blank scratch panel for working the problem live with the pen. Grows to
+   fill whatever height is left under the question + options. The dashed rule
+   and faint label read as an intentional "write here" zone, not dead space. */
+.present-work {
+  flex: 1 1 auto;
+  min-height: 30vh;
+  margin-top: clamp(0.4rem, 1.2vh, 1rem);
+  border-top: 2px dashed var(--line);
+  position: relative;
+}
+.present-work::before {
+  content: "Work";
+  position: absolute;
+  top: 0.55rem;
+  left: 0;
+  font: 600 clamp(0.65rem, 0.55rem + 0.3vw, 0.85rem) / 1 var(--font-body);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
 .present-options {
   list-style: none;
   margin: 0;
@@ -113,3 +138,8 @@
   transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
 }
 .present-fs--float:hover { opacity: 1; transform: translateY(-1px); }
+
+/* Work-space toggle sits just left of the fullscreen button. Lights up in the
+   accent colour while the work area is showing. */
+.present-fs--work { right: 4rem; }
+.present-fs--work.is-on { opacity: 1; background: var(--accent); }

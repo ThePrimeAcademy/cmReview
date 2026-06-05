@@ -35,3 +35,30 @@ export function acceptedAnswers(options) {
     .filter(Boolean);
   return answers.length > 0 ? answers : null;
 }
+
+// A purely numeric / quantitative answer: 320, 0.96, -2, 3/4, $5, 50%, 1,000.
+const NUMERIC_ANSWER_RE = /^[+\-−]?\$?\s*\d[\d.,\s]*(?:\/\d+)?\s*%?$/;
+// Math notation in the *visible* text (tags stripped first, so HTML attribute
+// `=` and the like never trigger): comparison/operator glyphs, LaTeX delims,
+// inline $…$, a/b fractions, and `x = …` / `x ^ …` operand pairs.
+const MATH_NOTATION_RE = /[≠≤≥±×÷√∑∏∫πθΔ∞≈°]|\\[([]|\$[^$\n]{1,40}\$|\b\d+\s*\/\s*\d+\b|[\w)]\s*[=^]\s*[\w(+\-]/i;
+const MATH_KEYWORDS_RE = /\b(solve|simplify|evaluate|factor|equation|expression|derivative|integral|slope|exponent|polynomial|quadratic|calculate|round to)\b/i;
+
+// Heuristic: does this question look like math? Drives whether the presenter
+// shows a blank work area by default. Erring toward "yes" is cheap — the
+// presenter has a manual toggle — so numeric free-text answers, math notation,
+// MathML/superscripts, and common math verbs all count.
+export function isMathQuestion(q) {
+  if (!q) return false;
+
+  const answers = acceptedAnswers(q.options);
+  if (answers && answers.every((a) => NUMERIC_ANSWER_RE.test(a))) return true;
+
+  const optionsRaw =
+    q.options == null ? '' : typeof q.options === 'string' ? q.options : JSON.stringify(q.options);
+  const rawHtml = `${q.question ?? ''} ${optionsRaw}`;
+  if (/<math|<su[bp]\b/i.test(rawHtml)) return true; // MathML or super/subscripts
+
+  const visible = textOf(rawHtml); // strips tags, so attribute `=` can't match
+  return MATH_NOTATION_RE.test(visible) || MATH_KEYWORDS_RE.test(visible);
+}
