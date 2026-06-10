@@ -232,6 +232,13 @@ a.row:hover { background: var(--paper-raised); transform: translateX(4px); }
 
 .loading { color: var(--ink-faint); padding: 3rem 0; text-align: center; }
 
+/* ── Math markup (decoded from ClassMarker [sqr] codes) ─────── */
+.cm-sqrt { white-space: nowrap; }
+.cm-sqrt-radicand {
+  border-top: max(1px, 0.07em) solid currentColor;
+  padding: 0 0.18em 0 0.08em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; }
 }
