@@ -3,13 +3,18 @@ import { useParams } from 'react-router-dom';
 import { getJson, missColor } from '../services/api';
 import { Chip, Crumbs, Empty, Loading } from '../components/ui';
 import QuestionHtml from '../components/QuestionHtml';
-import { acceptedAnswers, normalizeOptions, textOf } from '../lib/questions';
+import { acceptedAnswers, isMathQuestion, normalizeOptions, textOf } from '../lib/questions';
 import { usePresenter } from '../hooks/usePresenter';
 
 export default function QuestionPage() {
   const { groupId, testId, questionId } = useParams();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  // Blank panel to work the problem with the pen here, mirrored onto the
+  // projector's "Work" area. null = auto (open on math questions).
+  const [workOverride, setWorkOverride] = useState(null);
+
+  useEffect(() => setWorkOverride(null), [questionId]);
 
   useEffect(() => {
     getJson(`/api/groups/${groupId}/tests/${testId}/questions/${questionId}`)
@@ -30,7 +35,8 @@ export default function QuestionPage() {
         : null,
     [data, questionId],
   );
-  usePresenter(presentPayload);
+  const workOpen = workOverride ?? (presentPayload ? isMathQuestion(presentPayload) : false);
+  usePresenter(presentPayload, workOpen);
 
   if (error) return <Empty title="Could not load question">{error}</Empty>;
   if (!data) return <Loading />;
@@ -78,9 +84,11 @@ export default function QuestionPage() {
       <div className="detail">
         <section>
           <div className="q-content">
-            {bank?.question
-              ? <QuestionHtml html={bank.question} />
-              : <p className="q-missing">Question text wasn't included in the webhook data for this one — only result stats are available.</p>}
+            <div data-mirror="q">
+              {bank?.question
+                ? <QuestionHtml html={bank.question} />
+                : <p className="q-missing">Question text wasn't included in the webhook data for this one — only result stats are available.</p>}
+            </div>
 
             {options.length > 0 && (
               <div className="options">
@@ -88,7 +96,7 @@ export default function QuestionPage() {
                   const isCorrect = correctText && (textOf(opt.html) === correctText || opt.key.toLowerCase() === correctText);
                   const picks = pickCount(opt);
                   return (
-                    <div className={`option${isCorrect ? ' is-correct' : ''}`} key={opt.key}>
+                    <div className={`option${isCorrect ? ' is-correct' : ''}`} key={opt.key} data-mirror={`opt-${opt.key}`}>
                       <div className="bar" style={{ width: `${(picks / totalPicks) * 100}%` }} />
                       <span className="opt-text">
                         {isCorrect && <span className="tick">✓</span>}
@@ -132,6 +140,19 @@ export default function QuestionPage() {
                 ))}
               </div>
             )}
+
+            {/* Write the work here with the pen — it lands in the projector's
+                work area, so there's no need to draw on the second screen. */}
+            <div className="workbar">
+              <button
+                type="button"
+                className={`work-toggle${workOpen ? ' is-on' : ''}`}
+                onClick={() => setWorkOverride(!workOpen)}
+                aria-pressed={workOpen}
+              >✎ Work space</button>
+              <span className="work-hint">{workOpen ? 'mirrors to the projector' : 'off — hidden on the projector too'}</span>
+            </div>
+            {workOpen && <div className="q-work" data-mirror="work" aria-hidden="true" />}
           </div>
 
           <table className="attempts-table">

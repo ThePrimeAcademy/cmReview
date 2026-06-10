@@ -138,8 +138,3 @@
   transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
 }
 .present-fs--float:hover { opacity: 1; transform: translateY(-1px); }
-
-/* Work-space toggle sits just left of the fullscreen button. Lights up in the
-   accent colour while the work area is showing. */
-.present-fs--work { right: 4rem; }
-.present-fs--work.is-on { opacity: 1; background: var(--accent); }

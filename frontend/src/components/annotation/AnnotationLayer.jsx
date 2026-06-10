@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Toolbar from './Toolbar';
 import { DEFAULT_COLOR, TOOLS } from './tools';
 import { MIN_POINT_DISTANCE, strokeHit, strokePath } from './geometry';
+import { publishStrokes } from './mirror';
 import './annotation.css';
 
 // Pointer position in document space, so strokes stay glued to page content
@@ -112,6 +113,13 @@ export default function AnnotationLayer({ surfaceId }) {
     if (current && current.points.length) commit([...strokes, current]);
     setCurrent(null);
   };
+
+  // Mirror everything inked — including the in-progress stroke, so writing
+  // appears live — to whoever is listening (usePresenter relays it to the
+  // projector when a question is being presented).
+  useEffect(() => {
+    publishStrokes(current ? [...strokes, current] : strokes);
+  }, [strokes, current]);
 
   const rendered = current ? [...strokes, current] : strokes;
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { getJson, postJson } from './services/api';
 import PasswordGate from './components/PasswordGate';
+import AnnotationLayer from './components/annotation/AnnotationLayer';
 import PresentPage from './components/present/PresentPage';
 import GroupsPage from './pages/GroupsPage';
 import GroupPage from './pages/GroupPage';
@@ -74,7 +75,8 @@ export default function App() {
   if (authed === null) return null;
   if (authed === false) return <PasswordGate onUnlock={() => setAuthed(true)} />;
 
-  // Projector window: bare question-only view, no topbar/sync/annotation chrome.
+  // Projector window: bare question-only view, no topbar/sync chrome. The pen
+  // lives in this main window; PresentPage only displays the mirrored ink.
   if (location.pathname === '/present') return <PresentPage />;
 
   return (
@@ -98,6 +100,10 @@ export default function App() {
           <Route path="/groups/:groupId/tests/:testId/questions/:questionId" element={<QuestionPage key={dataVersion} />} />
         </Routes>
       </main>
+
+      {/* Draw here, on the teacher's screen — strokes on a presented question
+          are mirrored to the projector window. */}
+      <AnnotationLayer />
     </div>
   );
 }

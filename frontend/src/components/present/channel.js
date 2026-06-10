@@ -5,8 +5,9 @@
 export const PRESENT_CHANNEL = 'cmreview-present';
 
 export const MSG = {
-  SHOW: 'show', // teacher → projector: { kind, q: { number, question, options } }
+  SHOW: 'show', // teacher → projector: { kind, q: { number, question, options }, workOpen }
   HELLO: 'hello', // projector → teacher: "I just opened, send me the current question"
+  STROKES: 'strokes', // teacher → projector: { kind, qid, strokes } in landmark coords (see annotation/mirror.js)
 };
 
 export const channelSupported = typeof window !== 'undefined' && 'BroadcastChannel' in window;
